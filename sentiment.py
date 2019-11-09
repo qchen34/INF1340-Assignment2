@@ -141,7 +141,7 @@ def statement_pss(statement: str, kss: Dict[str, List[int]]) -> Union[float, Non
     word_count = 0
     for word in get_word_list(statement):
         if word in kss:
-            kss_sum += kss[word][0]
+            kss_sum += kss[word][0] / kss[word][1]
             word_count += 1
         else:
             kss_sum += 0
@@ -149,15 +149,13 @@ def statement_pss(statement: str, kss: Dict[str, List[int]]) -> Union[float, Non
     return kss_sum / word_count
 
 
-
 # PART III: Word Frequencies
-
 def score(item: Tuple[str, List[int]]) -> float:
     '''Given item as a (key, value) tuple, return the
     ratio of the first and second integer in value
     '''
-    
-    return 0
+
+    return item[1][0] / item[1][1]
 
 
 def most_extreme_words(count, min_occ, kss, pos):
@@ -178,15 +176,15 @@ def most_negative_words(count, min_occ, kss):
     '''
     
     return []
-    
+
+
 def most_positive_words(count, min_occ, kss):
     '''Return a list of the count most positive words that occur at least min_occ times in kss.
     '''
     
     return []
 
-        
-    
+
 if __name__ == "__main__":
 
 # Pick a dataset    
