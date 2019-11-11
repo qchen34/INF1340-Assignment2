@@ -1,7 +1,9 @@
 from typing import TextIO, List, Union, Dict, Tuple
 from collections import Counter
+from operator import itemgetter
 
 # PART I: File I/O, strings, lists
+
 
 def is_word(token: str) -> bool:
     '''Return True IFF token is an alphabetic word optionally containing
@@ -17,10 +19,13 @@ def is_word(token: str) -> bool:
     False
     >>> is_word("1960s")
     False
+    >>> is_word("/re")
     '''
-    if token.isalpha() or '/' in token or '-' in token:
-        return True
-    return False
+    for char in token:
+        if not char.isalpha() and char != '/' and char != '-':
+            return False
+
+    return True
 
 
 def get_word_list(statement: str) -> List[str]:
@@ -30,7 +35,7 @@ def get_word_list(statement: str) -> List[str]:
     >>> get_word_list('A terrible , 1970s mess of true-crime nonsense from writer/director Shyamalan .')
     ['a', 'terrible', 'mess', 'of', 'true-crime', 'nonsense', 'from', 'writer/director', 'shyamalan']
     '''
-
+    
     statement = statement.lower()
     new_list = []
     left_bound = 0
@@ -99,7 +104,7 @@ def extract_kss(file: TextIO) -> Dict[str, List[int]]:
     [examples not required]
     '''
     '''
-    for each line and for each word:
+    for each line and for each word in the line:
         if the word is already in the dictionary:
             add the current review score to the review score asscoiated with the word (find it in dict)
             add the occurrence by one
@@ -108,27 +113,27 @@ def extract_kss(file: TextIO) -> Dict[str, List[int]]:
             as 1
     '''
     dictionary = {}
-    occurrences = 1
-    sum_review_score = 0
-    value_list = [sum_review_score, occurrences]
 
     for line in file:
         for item in get_word_list(line):
             if item in dictionary:
-                dictionary[item] = [dictionary.get(item, 0)[0] + int(line[0]), dictionary.get(item, 1)[1] + 1]
+                dictionary[item] = [dictionary.get(item)[0] + int(line[0]), dictionary.get(item)[1] + 1]
             else:
                 dictionary[item] = [int(line[0]), 1]
+                # dictionary["brando"] = [line[0], 1]
+                #                         score   occ
 
     return dictionary
 
 
+# word_kss('brando', extract_kss(tiny))
 def word_kss(word: str, kss: Dict[str, List[int]]) -> Union[float, None]:
     '''Return the Known Sentiment Score of word if it appears in kss. 
     If word does not appear in kss, return None.
     [examples not required]
     '''    
     if word in kss:
-        return float(kss[word][0])
+        return kss.get(word)[0] / kss.get(word)[1]
     else:
         return None
              
@@ -141,12 +146,14 @@ def statement_pss(statement: str, kss: Dict[str, List[int]]) -> Union[float, Non
     word_count = 0
     for word in get_word_list(statement):
         if word in kss:
-            kss_sum += kss[word][0] / kss[word][1]
+            kss_sum += kss.get(word)[0] / kss.get(word)[1]
             word_count += 1
         else:
             kss_sum += 0
-
-    return kss_sum / word_count
+    if word_count > 0:
+        return kss_sum / word_count
+    else:
+        return None
 
 
 # PART III: Word Frequencies
@@ -167,22 +174,44 @@ def most_extreme_words(count, min_occ, kss, pos):
     If pos is False, return the most negative words.
     [examples not required]
     '''
-    
-    return []
+    '''
+    count: how many extreme words should it return, the top count number of sorted words
+    min_occ: at least how many times each word should have occurred in the dataset
+    if the occurrence of a word is lower than min_occ, dont return
+    pos: if pos is True, return the top positive ones, if false, return the top negative ones
+    '''
+    return_list = []
+    for item in kss:
+        if kss.get(item)[1] > min_occ:
+            cur_list = [item, kss.get(item)[0] / kss.get(item)[1], kss.get(item)[1]]
+            return_list.append(cur_list)
+    if pos:
+        # ascending order
+        return_list = sorted(return_list, key=itemgetter(1), reverse=True)
+    else:
+        # descending order
+        return_list = sorted(return_list, key=itemgetter(1))
+    index = 0
+    list = []
+    while index < count:
+        list.append(return_list[index])
+        index += 1
+
+    return list
     
     
 def most_negative_words(count, min_occ, kss):
     '''Return a list of the count most negative words that occur at least min_occ times in kss.
     '''
     
-    return []
+    return most_extreme_words(count, min_occ, kss, False)
 
 
 def most_positive_words(count, min_occ, kss):
     '''Return a list of the count most positive words that occur at least min_occ times in kss.
     '''
     
-    return []
+    return most_extreme_words(count, min_occ, kss, True)
 
 
 if __name__ == "__main__":
