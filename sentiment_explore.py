@@ -15,4 +15,11 @@ if __name__ == "__main__":
     # Your exploration testing code here
     pass
 
+'''
+Looking at PSS in comparison to original score for each line. Calculate the difference for each line. Calculate sum of
+the differences and then divide to receive an average variance.
+
+if were to go deeper, might want to look at the impact of the neutral words on our PSS model
+
+'''
 

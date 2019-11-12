@@ -36,8 +36,12 @@ def get_word_list(statement: str) -> List[str]:
     ['a', 'terrible', 'mess', 'of', 'true-crime', 'nonsense', 'from', 'writer/director', 'shyamalan']
     '''
     
-    statement = statement.lower()
+    new_statement = statement.lower().split()
     new_list = []
+    for char in new_statement:
+        if is_word(char):
+            new_list.append(char)
+            '''
     left_bound = 0
     right_bound = 0
     while right_bound < len(statement):
@@ -48,6 +52,7 @@ def get_word_list(statement: str) -> List[str]:
             left_bound = right_bound
         else:
             right_bound += 1
+            '''
     return new_list
 
 
@@ -180,24 +185,19 @@ def most_extreme_words(count, min_occ, kss, pos):
     if the occurrence of a word is lower than min_occ, dont return
     pos: if pos is True, return the top positive ones, if false, return the top negative ones
     '''
-    return_list = []
+    new_list = []
     for item in kss:
-        if kss.get(item)[1] > min_occ:
-            cur_list = [item, kss.get(item)[0] / kss.get(item)[1], kss.get(item)[1]]
-            return_list.append(cur_list)
+        if kss.get(item)[1] >= min_occ:
+            current_list = [item, kss.get(item)[0] / kss.get(item)[1], kss.get(item)[1]]
+            new_list.append(current_list)
     if pos:
-        # ascending order
-        return_list = sorted(return_list, key=itemgetter(1), reverse=True)
-    else:
         # descending order
-        return_list = sorted(return_list, key=itemgetter(1))
-    index = 0
-    list = []
-    while index < count:
-        list.append(return_list[index])
-        index += 1
+        new_list = sorted(new_list, key=itemgetter(1), reverse=True)
+    else:
+        # ascending order
+        new_list = sorted(new_list, key=itemgetter(1))
 
-    return list
+    return new_list[0: count]
     
     
 def most_negative_words(count, min_occ, kss):
