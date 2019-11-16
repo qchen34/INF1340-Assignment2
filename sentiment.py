@@ -41,18 +41,6 @@ def get_word_list(statement: str) -> List[str]:
     for char in new_statement:
         if is_word(char):
             new_list.append(char)
-            '''
-    left_bound = 0
-    right_bound = 0
-    while right_bound < len(statement):
-        if statement[right_bound] == ' ':
-            if is_word(statement[left_bound: right_bound]):
-                new_list.append(statement[left_bound: right_bound])
-            right_bound += 1
-            left_bound = right_bound
-        else:
-            right_bound += 1
-            '''
     return new_list
 
 
@@ -84,7 +72,7 @@ def word_kss_scan(word: str, file: TextIO) -> Union[None, float]:
     ratings = []
     sum_rating = 0
     occurrences = 0
-    # how does line in file works, ask TA or velien
+
     for line in file:
         for item in get_word_list(line):
             if item == word:
@@ -95,8 +83,8 @@ def word_kss_scan(word: str, file: TextIO) -> Union[None, float]:
 
     for rating in ratings:
         sum_rating += rating
-    average = sum_rating / occurrences
-    return average
+
+    return sum_rating / occurrences
 
 # PART II: Dictionaries 
 
@@ -223,6 +211,7 @@ if __name__ == "__main__":
     #dataset = 'full.txt'
     
     # Your test code here
+
     pass
 
 
