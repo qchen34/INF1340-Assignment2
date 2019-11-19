@@ -20,6 +20,7 @@ def is_word(token: str) -> bool:
     >>> is_word("1960s")
     False
     >>> is_word("/re")
+    True
     '''
     for char in token:
         if not char.isalpha() and char != '/' and char != '-':
@@ -36,12 +37,12 @@ def get_word_list(statement: str) -> List[str]:
     ['a', 'terrible', 'mess', 'of', 'true-crime', 'nonsense', 'from', 'writer/director', 'shyamalan']
     '''
     
-    new_statement = statement.lower().split()
-    new_list = []
-    for char in new_statement:
+    split_statement = statement.lower().split()
+    return_list = []
+    for char in split_statement:
         if is_word(char):
-            new_list.append(char)
-    return new_list
+            return_list.append(char)
+    return return_list
 
 
 def judge(score: float) -> str:
@@ -55,6 +56,7 @@ def judge(score: float) -> str:
     >>> judge('3.4')
     'positive'
     '''
+
     score = float(score)
     if score <= 1.5:
         return 'negative'
@@ -113,8 +115,6 @@ def extract_kss(file: TextIO) -> Dict[str, List[int]]:
                 dictionary[item] = [dictionary.get(item)[0] + int(line[0]), dictionary.get(item)[1] + 1]
             else:
                 dictionary[item] = [int(line[0]), 1]
-                # dictionary["brando"] = [line[0], 1]
-                #                         score   occ
 
     return dictionary
 
@@ -139,7 +139,7 @@ def statement_pss(statement: str, kss: Dict[str, List[int]]) -> Union[float, Non
     word_count = 0
     for word in get_word_list(statement):
         if word in kss:
-            kss_sum += kss.get(word)[0] / kss.get(word)[1]
+            kss_sum += word_kss(word, kss)
             word_count += 1
         else:
             kss_sum += 0
@@ -158,7 +158,7 @@ def score(item: Tuple[str, List[int]]) -> float:
     return item[1][0] / item[1][1]
 
 
-def most_extreme_words(count, min_occ, kss, pos):
+def most_extreme_words(count: int, min_occ: int, kss: Dict[str, List[int]], pos: bool) -> List[List[Union[str, float, int]]]:
     '''Return a list of lists containing the count most extreme words
     that occur at least min_occ times in kss.
     Each item in the list is formatted as follows:
@@ -173,45 +173,45 @@ def most_extreme_words(count, min_occ, kss, pos):
     if the occurrence of a word is lower than min_occ, dont return
     pos: if pos is True, return the top positive ones, if false, return the top negative ones
     '''
-    new_list = []
-    for item in kss:
-        if kss.get(item)[1] >= min_occ:
-            current_list = [item, kss.get(item)[0] / kss.get(item)[1], kss.get(item)[1]]
-            new_list.append(current_list)
     if pos:
-        # descending order
-        new_list = sorted(new_list, key=itemgetter(1), reverse=True)
+        sorted_list = sorted(kss.items(), key=score, reverse=True)
     else:
-        # ascending order
-        new_list = sorted(new_list, key=itemgetter(1))
+        sorted_list = sorted(kss.items(), key=score)
+    most_extreme_word_list = []
 
-    return new_list[0: count]
-    
-    
-def most_negative_words(count, min_occ, kss):
-    '''Return a list of the count most negative words that occur at least min_occ times in kss.
-    '''
-    
+    index = 0
+    while index < count and sorted_list:
+        current_item = sorted_list.pop(0)
+        if current_item[1][1] >= min_occ:
+            most_extreme_word_list.append([current_item[0], score(current_item), current_item[1][1]])
+            index += 1
+
+    return most_extreme_word_list
+
+
+def most_negative_words(count: int, min_occ: int, kss: Dict[str, List[int]]) -> List[List[Union[str, float, int]]]:
+    """Return a list of the count most negative words that occur at least min_occ times in kss.
+    """
     return most_extreme_words(count, min_occ, kss, False)
 
 
-def most_positive_words(count, min_occ, kss):
-    '''Return a list of the count most positive words that occur at least min_occ times in kss.
-    '''
-    
+def most_positive_words(count: int, min_occ: int, kss: Dict[str, List[int]]) -> List[List[Union[str, float, int]]]:
+    """Return a list of the count most positive words that occur at least min_occ times in kss.
+    """
     return most_extreme_words(count, min_occ, kss, True)
 
 
 if __name__ == "__main__":
 
+
 # Pick a dataset    
-    dataset = 'tiny.txt'
+    dataset = open('tiny.txt', 'r')
     #dataset = 'small.txt'
     #dataset = 'medium.txt'
     #dataset = 'full.txt'
     
     # Your test code here
+    print(extract_kss(dataset))
 
-    pass
 
 
